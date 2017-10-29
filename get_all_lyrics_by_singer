@@ -1,0 +1,27 @@
+BASE_URL = 'http://so.1ting.com/all.do?q=%E7%8E%8B%E8%8F%B2&page='
+#           https://y.qq.com/portal/singer_list.html#t4=2&t3=all&t2=man&t1=cn&
+#a_z = list(map(chr, range(97, 123)))
+page_no = range(1, 2)
+
+for letter in page_no:
+    with open('data/'+str(letter)+'.txt') as f:
+        url = BASE_URL + str(letter)
+        page_res = urllib2.urlopen(url).read()
+        soup = BeautifulSoup(page_res, 'html.parser')
+
+    # Scrap the artists for a given letter and get their URLs
+    #//*[@id="mod-singerlist"]/ul/li[1]
+    with open('data/' + str(letter) + '.txt', 'wb') as w:
+        regex = r"[1-9][1-9]"
+        for column in soup.findAll('div', {'class': 'songList'}):
+            #for link in column.findAll(href=re.compile("^http")):
+            for link in column.findAll(href=re.compile(".*geci*")):
+                song_name = column.td.song
+                lyrics_url = link['href'].encode('utf-8')
+                lyrics_no = lyrics_url[25:31]
+                lyrics_txt_url = "http://www.1ting.com/api/geci/txt/"+str(lyrics_no)
+                print("==== song_name, lyrics_no :",song_name,lyrics_txt_url)
+                #w.write(link['href'] + '\n')
+                w.write(str(lyrics_txt_url) + '\n')
+
+print ("Done")
